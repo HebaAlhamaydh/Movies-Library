@@ -5,7 +5,7 @@
 **Author Name**: Heba Alhamaydh
 
 ## WRRC
-![webRequestResponseCycle](webrrc.jpg)
+![webRequestResponseCycle](images/webrrc.jpg)
 
 ## Overview
 
@@ -22,3 +22,6 @@
 1. handle the server error (status 500)
 2. handle "page not found error" (status 404)
 3. Create a constructor function to ensure your data follow the same format (i dont need to send all data to the client)
+## Get 3rd Party data from an API
+### Give me the recipe data
+![Get 3rd Party data from an API](images/3rdpartyapi.jpg)
