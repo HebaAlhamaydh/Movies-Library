@@ -12,22 +12,30 @@ app.use(cors());
 const PORT = 3000;
 
 /////creating a rout /////
+
 app.get("/", handleHomePage);
-app.get("/favorite",  handleFavorite);
+app.get("/favorite", handleFavorite);
 app.get("/trending", handleTrending);
 app.get("/search", handleSearch);
 app.get("/popular", hundlePopular);
 app.get("/nowPlaying", handleNowPlaying);
-////////functions//////
 
-//trending///
+////////functions//////
+function handleFavorite(req, res) {
+    res.send("Welcome to Favorite Page");
+}
+
+function handleHomePage(req, res) {
+    let recip = new Recipe("Spider-Man: No Way Home", "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man.")
+    res.send(recip);
+}
 function handleTrending(req, res) {
     const url = `https://api.themoviedb.org/3/trending/all/week?api_key=${apiKey}&language=en-US?`;
     //axios.get(url).then().catch()
     axios.get(url)
         .then(result => {
-            //console.log(result);
-            //console.log(result.data);
+            console.log(result);
+            console.log(result.data);
             let movies = result.data.results.map(recip => {
                 return new Movie(recip.id, recip.title, recip.release_date, recip.poster_path, recip.overview)
             })
@@ -77,30 +85,22 @@ function handleNowPlaying(req, res) {
         })
 }
 
- function handleError500(req,res) {
-    if(req.staus=500)
-    res.status(500).send({
-        "status": 500,
-        "responseText": "Sorry, something went wrong"
+function handleError500(req, res) {
+    if (req.staus = 500)
+        res.status(500).send({
+            "status": 500,
+            "responseText": "Sorry, something went wrong"
         });
- } 
- function handleError404(req,res) {
-    if(req.staus=404)
-    res.send({
-        "status": 404,
-        "responseText": "page not found error"
+}
+function handleError404(req, res) {
+    if (req.staus = 404)
+        res.send({
+            "status": 404,
+            "responseText": "page not found error"
         });
- } 
-
-function handleFavorite(req,res)
-{
-    res.send("Welcome to Favorite Page");
 }
 
-function handleHomePage(req, res) {
-    let recip = new Recipe("Spider-Man: No Way Home", "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man.")
-    res.send(recip);
-}
+
 
 //app.method
 app.listen(PORT, () => {
