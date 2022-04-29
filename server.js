@@ -1,15 +1,26 @@
 'use strict'
+const url="postgres://heba:0000@localhost:5432/movies";
+const PORT = 3000;
+const apiKey = process.env.API_KEY;
 
-const express = require('express');
-const res = require('express/lib/response');
+const express =require('express');
 const cors = require("cors");
+
+const bodyParser = require('body-parser');
+require('dotenv').config();
+
 const axios = require("axios").default;
 const recipesData = require("./Movie Data/data.json");
-require('dotenv').config();
-const apiKey = process.env.API_KEY;
+
+const{Client}=require('pg');
+const client =new Client(url);
+
 const app = express();
 app.use(cors());
-const PORT = 3000;
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+
+
 
 /////creating a rout /////
 
@@ -20,11 +31,35 @@ app.get("/search", handleSearch);
 app.get("/popular", hundlePopular);
 app.get("/nowPlaying", handleNowPlaying);
 
+app.post("/addMovie",handleAddMovie);
+app.get("/getMovies",handleGetMovies);
+
 ////////functions//////
+function handleAddMovie(req,res){
+    const {name, time, summary, image}=req.body;
+    let sql='INSERT INTO movie(name, time, summary, image) VALUES($1,$2,$3,$4)RETURNING *';
+    let values=[name, time, summary, image];
+    console.log(req.body);
+    client.query(sql,values).then((result)=>{
+        console.log(result.rows);
+        return res.status(201).json(result.rows);
+    }).catch();
+}
+function handleGetMovies(req,res){
+    let sql = 'SELECT * from movie;'
+    client.query(sql).then((result) => {
+      console.log(result);
+      res.json(result.rows);
+    }).catch((err) => {
+      handleError(err, req, res);
+    });
+}
+function handleError(error, req, res) {
+    res.status(500).send(error)
+  }
 function handleFavorite(req, res) {
     res.send("Welcome to Favorite Page");
 }
-
 function handleHomePage(req, res) {
     let recip = new Recipe("Spider-Man: No Way Home", "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man.")
     res.send(recip);
@@ -100,11 +135,11 @@ function handleError404(req, res) {
         });
 }
 
-
-
-//app.method
-app.listen(PORT, () => {
-    console.log("server is running")
+//after connecting to db,start the server
+client.connect().then(() =>{
+    app.listen(PORT, () => {
+    console.log("server is running");
+});
 })
 
 function Recipe(title, poster_path, overview) {

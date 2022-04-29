@@ -25,3 +25,6 @@
 ## Get 3rd Party data from an API
 ### Give me the recipe data
 ![Get 3rd Party data from an API](images/3rdpartyapi.jpg)
+
+# Create request to the database
+![webRequestResponseCycle](images/wrrc3.jpg)
