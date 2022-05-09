@@ -1,5 +1,6 @@
-'use strict'
+'use strict';
 const url="postgres://heba:0000@localhost:5432/movies";
+
 const PORT = 3000;
 const apiKey = process.env.API_KEY;
 
@@ -24,17 +25,58 @@ app.use(bodyParser.json());
 
 /////creating a rout /////
 
-app.get("/", handleHomePage);
-app.get("/favorite", handleFavorite);
-app.get("/trending", handleTrending);
-app.get("/search", handleSearch);
-app.get("/popular", hundlePopular);
-app.get("/nowPlaying", handleNowPlaying);
-
+app.get("/",handleHomePage);
+app.get("/favorite",handleFavorite);
+app.get("/trending",handleTrending);
+app.get("/search",handleSearch);
+app.get("/popular",hundlePopular);
+app.get("/nowPlaying",handleNowPlaying);
 app.post("/addMovie",handleAddMovie);
 app.get("/getMovies",handleGetMovies);
-
+///////////
+app.put('/update/:id', handleUpdateParams);
+app.delete('/delete/:id', handleDeleteParams);
+app.get('/getMovie/:id', handleGetMovieData);
+// ////////////
+// app.use(handleError);
 ////////functions//////
+// http://localhost:3000/update/1
+function handleUpdateParams(req, res) {
+    const{id}=req.params;
+    const {name, time, summary, image}=req.body;
+    let sql='UPDATE movie SET  name = $1, time = $2,summary=$3,image=$4 WHERE id=$5 RETURNING *';
+    let values=[name, time, summary, image,id];
+    // console.log(req.params);
+    client.query(sql,values).then((result)=>{
+        console.log(result.rows);
+        return res.status(201).json(result.rows);
+    }).catch();
+}
+// // http://localhost:3000/delete/1
+function handleDeleteParams(req, res) {
+    
+   const{id} = req.params;
+    let sql='DELETE FROM movie WHERE id=$1';
+   let value=[id];
+   client.query(sql,value).then((result)=>{
+    return res.status(201).json(result.rows);
+}).catch();
+}
+// // http://localhost:3000/getMovie/1
+function handleGetMovieData(req, res) {
+    const{id} = req.params;
+    let sql = `SELECT * from movie WHERE id=${id}`;
+    // let value=[id];
+    client.query(sql).then((result) => {
+      console.log(result);
+    //   res.send(result.rows);
+      return res.status(201).json(result.rows);
+    }).catch((err) => {
+        console.log(err);
+    //   handleError(err, req, res);
+    });
+}
+// /////////////
 function handleAddMovie(req,res){
     const {name, time, summary, image}=req.body;
     let sql='INSERT INTO movie(name, time, summary, image) VALUES($1,$2,$3,$4)RETURNING *';
@@ -54,9 +96,9 @@ function handleGetMovies(req,res){
       handleError(err, req, res);
     });
 }
-function handleError(error, req, res) {
-    res.status(500).send(error)
-  }
+// function handleError(error, req, res) {
+//     res.status(500).send(error);
+//   }
 function handleFavorite(req, res) {
     res.send("Welcome to Favorite Page");
 }
@@ -72,7 +114,7 @@ function handleTrending(req, res) {
             console.log(result);
             console.log(result.data);
             let movies = result.data.results.map(recip => {
-                return new Movie(recip.id, recip.title, recip.release_date, recip.poster_path, recip.overview)
+                return new Movie(recip.id, recip.title, recip.release_date, recip.poster_path, recip.overview);
             })
             res.json(movies);
         })
@@ -120,20 +162,20 @@ function handleNowPlaying(req, res) {
         })
 }
 
-function handleError500(req, res) {
-    if (req.staus = 500)
-        res.status(500).send({
-            "status": 500,
-            "responseText": "Sorry, something went wrong"
-        });
-}
-function handleError404(req, res) {
-    if (req.staus = 404)
-        res.send({
-            "status": 404,
-            "responseText": "page not found error"
-        });
-}
+// function handleError500(req, res) {
+//     if (req.staus = 500)
+//         res.status(500).send({
+//             "status": 500,
+//             "responseText": "Sorry, something went wrong"
+//         });
+// }
+// function handleError404(req, res) {
+//     if (req.staus = 404)
+//         res.send({
+//             "status": 404,
+//             "responseText": "page not found error"
+//         });
+// }
 
 //after connecting to db,start the server
 client.connect().then(() =>{
